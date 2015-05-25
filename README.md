@@ -22,5 +22,16 @@ Right now, the response is a byte[] variable, it should be transformed to other 
 Extract the CICS® TG Client API bundle, com.ibm.ctg.client-1.0.0.jar from the CICS TG SDK package cicstgsdk/api/java/runtime to a directory on the local file system IBM drivers
 ### 3- Install driver in local maven repository 
        mvn install:install-file -Dfile=com.ibm.ctg.client-1.0.0.jar -DgroupId=com.ibm.ctg -DartifactId=client -Dversion=1.0.0 -Dpackaging=jar
+
+	# Installing CTG comp
+		mvn install:install-file -Dfile=ccf2-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=ccf2 -Dversion=8.0.0.1 -Dpackaging=jar
+		mvn install:install-file -Dfile=cicseci-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=cicseci -Dversion=8.0.0.1 -Dpackaging=jar
+		mvn install:install-file -Dfile=cicsecitools-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=cicsecitools -Dversion=8.0.0.1 -Dpackaging=jar
+		mvn install:install-file -Dfile=cicsframe-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=cicsframe -Dversion=8.0.0.1 -Dpackaging=jar
+		mvn install:install-file -Dfile=ctgclient-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=ctgclient -Dversion=8.0.0.1 -Dpackaging=jar
+		mvn install:install-file -Dfile=ctgserver-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=ctgserver -Dversion=8.0.0.1 -Dpackaging=jar
+		mvn install:install-file -Dfile=security-8.0.0.1.jar -DgroupId=com.ibm.connector2.cics -DartifactId=security -Dversion=8.0.0.1 -Dpackaging=jar
+
+
 ### 4- Build this project use
        mvn install
