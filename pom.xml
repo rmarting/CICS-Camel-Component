@@ -4,19 +4,52 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.jboss.fuse</groupId>
-	<artifactId>cics-component</artifactId>
+	<groupId>org.apache.camel</groupId>
+	<artifactId>camel-cics</artifactId>
 	<packaging>bundle</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 
-	<name>Camel CICS Component</name>
+  	<name>Camel :: CTG/CICS</name>
+  	<description>Camel IBM CTG/CICS support</description>
 	<url>http://www.redhat.com</url>
+	
+	<!-- TODO distributionManagement to Allianz -->
+	<!-- 
+	<distributionManagement>
+		<repository>
+			<id>lnxnexus.intrallianz.es</id>
+			<name>Allianz Internal Releases</name>
+			<url>http://lnxnexus.intrallianz.es:8081/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>lnxnexus.intrallianz.es</id>
+			<name>Allianz Internal Snapshots</name>
+			<url>http://lnxnexus.intrallianz.es:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+	-->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		
+		<!-- Camel OSGi Component -->
 		<camel.osgi.export.pkg>org.apache.camel.component.cics.*</camel.osgi.export.pkg>
 		<camel.osgi.export.service>org.apache.camel.spi.ComponentResolver;component=cics</camel.osgi.export.service>
+		
+		<!-- Versions -->
+		<org.apache.camel.version>2.15.2</org.apache.camel.version>
+		<!-- JBoss Fuse 6.1 -->
+		<!--
+		<org.apache.camel.version>2.12.0.redhat-610379</org.apache.camel.version>
+		-->
+		<!-- JBoss Fuse 6.2 -->
+		<!--
+		<org.apache.camel.version>2.15.1.redhat-621002</org.apache.camel.version>
+		-->
+		
+		<org.slf4j.version>1.7.5</org.slf4j.version>
+		<log4j.version>1.2.17</log4j.version>
 	</properties>
 
 	<repositories>
@@ -101,42 +134,44 @@
 	</pluginRepositories>
 
 	<dependencies>
+		<!-- Apache Camel --> 
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core</artifactId>
-			<version>2.15.2</version>
+			<version>${org.apache.camel.version}</version>
 		</dependency>
 
-		<!-- logging -->
+		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.5</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-			<scope>test</scope>
+			<version>${org.slf4j.version}</version>
 		</dependency>
 
-		<dependency><!-- ctgclient.jar -->
-			<groupId>com.ibm.connector2.cics</groupId>
-			<artifactId>ctgclient</artifactId>
-			<version>8.0.0.1</version>
+		<!-- CTC/CICS v.9.1 -->
+		<dependency>
+			<groupId>com.ibm.ctg</groupId>
+			<artifactId>client</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
 		<!-- testing -->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-test</artifactId>
-			<version>2.12.0.redhat-610379</version>
+			<version>${org.apache.camel.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${org.slf4j.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -172,12 +207,22 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>org.jboss.fuse.cics-component</Bundle-SymbolicName>
-						<Export-Service>org.apache.camel.spi.ComponentResolver;component=</Export-Service>
+						<Bundle-SymbolicName>org.apache.camel.camel-cics</Bundle-SymbolicName>
+						<Private-Package>org.apache.camel.component.cics.*</Private-Package>
+						<Import-Package>*</Import-Package>
+						<!-- 
+						<Export-Package>
+							com.ibm.ctg.client,
+							com.ibm.ctg.client.exceptions,
+							com.ibm.ctg.epi,
+							com.ibm.ctg.util,
+							com.ibm.ctg.monitoring,
+							com.ibm.ctg.security
+						</Export-Package>
+						-->
 					</instructions>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 

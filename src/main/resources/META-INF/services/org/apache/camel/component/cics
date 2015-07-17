@@ -1,1 +1,1 @@
-class=org.jboss.fuse.cics.component.CICSComponent
+class=org.apache.camel.component.cics.CICSComponent
