@@ -69,7 +69,7 @@ public class CICSEndpoint extends DefaultEndpoint {
 
     @UriParam(defaultValue = "Cp1145")
     @Metadata(required = "false")
-    private String encoding = "Cp1145"; // "Cp285"; 
+    private String encoding = "Cp1145"; // "Cp285";
 
     /** Other parameters */
     private Map<String, Object> parameters;
@@ -100,8 +100,10 @@ public class CICSEndpoint extends DefaultEndpoint {
     /**
      * @param endpointUri
      * @param component
-     * @param remaining arde.intrallianz.es:2006/CI0ARDE
-     * @param parameters {ServerName=CI0ARDE, TraceLevel=9}
+     * @param remaining
+     *            arde.intrallianz.es:2006/CI0ARDE
+     * @param parameters
+     *            {ServerName=CI0ARDE, TraceLevel=9}
      */
     public CICSEndpoint(String endpointUri, CICSComponent component, String remaining, Map<String, Object> parameters) {
         super(endpointUri, component);
@@ -160,7 +162,8 @@ public class CICSEndpoint extends DefaultEndpoint {
     /**
      * Evaluate remaining uri string and set host, port and program properties
      * 
-     * @param remaining String with connection string in <code>host[:port]/server</code> format
+     * @param remaining
+     *            String with connection string in <code>host[:port]/server</code> format
      */
     public void setRemaining(String remaining) {
         LOGGER.info("Getting host, port and server from remaining {}", remaining);
@@ -206,7 +209,8 @@ public class CICSEndpoint extends DefaultEndpoint {
     /**
      * Optional parameters to be used by endpoints
      * 
-     * @param parameters parameters
+     * @param parameters
+     *            parameters
      */
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;

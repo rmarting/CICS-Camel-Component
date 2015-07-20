@@ -1,8 +1,7 @@
-# Apache Camel CTG/CICS
-=======================
+# Apache Camel CICS Transation Gateway
+======================================
 
-This is a small probe of concept about Camel CICS component to connect with mainframe through CICS Gateway Transaction client.
-Right now, the response is a byte[] variable, it should be transformed to other structure.
+This is a small probe of concept about Camel Component to connect with mainframe through CICS Transation Gateway client.
 
 ## Features
  * ECI (External call interface) calling a CICS program in a CICS server.
@@ -12,14 +11,15 @@ Right now, the response is a byte[] variable, it should be transformed to other 
      	cics:serverName1/program1?sslKeyring=sslKeyring1&sslPassword=sslPassword1&userId=userId1&password=password1
  * Exchange
  	Headers:
- 		programName: Program to execute in CICS
- 		transactionId: Transaction ID to execute the program in CICS
+ 		programName: 	Program to execute in CICS
+ 		transactionId: 	Transaction ID to execute the program in CICS
+ 		commAreaSize:	CommArea Size, required if body exchange is using String 
  	Body
- 		In: String with the data in the expected pattern by the final program
- 		Out: String with the data returned after the program was executed in CICS
+ 		In: 	String or byte[] with the data in the expected pattern by the final program
+ 		Out: 	String or byte[] (In Body defines) with the data returned after the program was executed in CICS
 
 ## Requirements
- * CICS Transaction Gateway version >= 9.1 must be installed.
+ * CICS Transation Gateway version >= 9.1 must be installed.
  * Fuse >= 6.1 access to the Fuse Maven Repostory
 
 ## Instructions 
@@ -28,7 +28,7 @@ Right now, the response is a byte[] variable, it should be transformed to other 
     Version CICS Transaction Gateway client 9.1 or higher
 
 ### 2.- Obtain driver OSGI bundle 
-    Extract the CICS® TG Client API bundle (com.ibm.ctg.client-1.0.0.jar) from the CICS TG SDK 
+    Extract the CICS Transation Gateway Client API bundle (com.ibm.ctg.client-1.0.0.jar) from the CICS TG SDK 
     package cicstgsdk/api/java/runtime to a directory on the local file system IBM drivers
 
 ### 3.- Install driver in Maven Repository
@@ -47,21 +47,21 @@ Right now, the response is a byte[] variable, it should be transformed to other 
 	
 ### 5.- Install in a Fuse standalone	
 	
-		# Install IBM CTG/CICS OSGi Component 
+		# Install CICS Transation Gateway OSGi Component 
 		osgi:install -s mvn:com.ibm.ctg/client/1.0.0
 		
-		# Install Camel CICS Component
+		# Install Camel CICS Transation Gateway Component
 		osgi:install -s mvn:org.apache.camel/camel-cics/1.0.0-SNAPSHOT
 	
-		# Install 
-		osgi:install -s mvn:com.redhat.samples.fuse.cics/camel-cics-blueprint/1.0.2-SNAPSHOT
+		# Install a Camel Route to test it 
+		osgi:install -s mvn:com.redhat.fuse.samples/camel-cics-blueprint/1.0.0-SNAPSHOT
 	
 ### 6.- Install in a Fuse Fabric (TODO)	
 	
-		# Install IBM CTG/CICS OSGi Component 
+		# Install CICS Transation Gatewa OSGi Component 
 		osgi:install -s mvn:com.ibm.ctg/client/1.0.0
 		
-		# Install Camel CICS Component Profile
+		# Install Camel CICS Transation Gatewa Component Profile
 		mvn package fabric8:deploy
 		
 		osgi:install -s mvn:org.apache.camel/camel-cics/1.0.0-SNAPSHOT	
@@ -75,4 +75,20 @@ Right now, the response is a byte[] variable, it should be transformed to other 
 	
 		# Install CICS Camel Route Sample 
 		mvn package fabric8:deploy
-				
+		
+		
+# TO-DO Apache Camel CICS Transation Gateway
+============================================
+
+## Refactor
+ * Rename to camel-ctg (CTG = CICS Transaction Gateway)
+
+## Develop
+ * Create feature to include CTG and CTG Camel Component together
+ * JavaDoc in all Java components
+
+## Test
+ * Unit test?
+
+## Deploy
+ * Deploy in Fuse Fabric
