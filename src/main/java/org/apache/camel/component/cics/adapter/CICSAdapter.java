@@ -11,9 +11,9 @@ import com.ibm.ctg.client.ECIRequest;
 import com.ibm.ctg.client.JavaGateway;
 
 /**
- * This is an adapter class to access IBM CTG/CICS gateway.<br/>
+ * This is an adapter class to access CICS Transation Gateway.<br/>
  * 
- * This class uses com.ibm.ctg.client IBM CTG connector proprietary APIs.
+ * This class uses com.ibm.ctg.client CICS Transation Gateway propietary API.
  * 
  * @author Sergio Gutierrez (sgutierr@redhat.com)
  * @author Jose Roman Martin Gil (rmarting@redhat.com)
@@ -28,18 +28,18 @@ public class CICSAdapter {
     /** TCP Protocol */
     private static final String GW_PROTOCOL_TCP = "tcp";
 
-    // JavaGateway to connect to CTG/CICS
+    // JavaGateway to connect to CICS Transation Gateway
     private JavaGateway gateway = null;
-    // CICSEndpoint to call CTG/CICS
+    // CICSEndpoint to call CICS Transation Gateway
     private CICSEndpoint endpoint = null;
 
     /**
      * Constructor.<br/>
      * 
-     * Connection string data is defined from the end point used. If no URL is defined then the default connection string will
-     * be used.<br/>
+     * Connection string data is defined from the end point used. If no URL is defined then the default connection string will be used.<br/>
      * 
-     * @param cicsEndpoint end point data to CTG/CICS
+     * @param cicsEndpoint
+     *            end point data to CICS Transation Gateway
      * 
      * @throws IOException
      */
@@ -117,7 +117,7 @@ public class CICSAdapter {
     }
 
     /**
-     * Open the Gateway to CTG/CICS
+     * Open the Gateway to CICS Transation Gateway
      * 
      * @throws IOException
      */
@@ -127,24 +127,39 @@ public class CICSAdapter {
                 this.gateway.open();
 
                 if (this.gateway.isOpen()) {
-                    LOGGER.info("Gateway opened to CTC/CICS");
+                    LOGGER.info("Gateway opened to CICS Transation Gateway");
                 }
             } else {
-                LOGGER.info("Gateway already opened to CTC/CICS");
+                LOGGER.info("Gateway already opened to CICS Transation Gateway");
             }
         } catch (IOException e) {
-            LOGGER.error("Unable to open gateway: " + e.getMessage(), e);
+            LOGGER.error("Unable to open CICS Transation Gateway: " + e.getMessage(), e);
             throw e;
         }
     }
 
-    public String runTransaction(String programName, String transactionId, String inputCommArea) throws IOException, Exception {
+    public String runTransaction(String programName, String transactionId, String inputCommArea, int commAreaSize) throws IOException,
+            Exception {
+        // Preparing byte[] data
         // Shared CommArea in byte format
-        byte[] byteCommArea = inputCommArea.getBytes(this.endpoint.getEncoding());
+        byte[] byteCommArea = null;
+        if (commAreaSize > 0) {
+            byteCommArea = new byte[commAreaSize];
+            if (inputCommArea != null) {
+                // Calls local getBytes function to extract byte array in either ASCII or unconverted form.
+                System.arraycopy(getBytes(inputCommArea, this.endpoint.getEncoding()), 0, byteCommArea, 0,
+                        Math.min(byteCommArea.length, inputCommArea.length()));
+            }
+        } else if (inputCommArea != null) {
+            // Calls local getBytes function to extract byte array in either ASCII or unconverted form.
+            byteCommArea = getBytes(inputCommArea, this.endpoint.getEncoding());
+        } else {
+            byteCommArea = new byte[commAreaSize];
+        }
 
-        // if (LOGGER.isDebugEnabled()) {
-        LOGGER.info("Input CommArea String Data:\n-** INPUT COMMAREA **-\n{}\n-** END INPUT COMMAREA **-", inputCommArea);
-        // }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Input CommArea String Data:\n-** INPUT COMMAREA **-\n{}\n-** END INPUT COMMAREA **-", inputCommArea);
+        }
 
         // Executing Transaction with byte array
         byteCommArea = runTransaction(programName, transactionId, byteCommArea);
@@ -152,9 +167,9 @@ public class CICSAdapter {
         // Output CommArea in String Format
         String outputCommArea = new String(byteCommArea, this.endpoint.getEncoding());
 
-        // if (LOGGER.isDebugEnabled()) {
-        LOGGER.info("Output CommArea String Data:\n-** OUTPUT COMMAREA **-\n{}\n-** END OUTPUT COMMAREA **-", outputCommArea);
-        // }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Output CommArea String Data:\n-** OUTPUT COMMAREA **-\n{}\n-** END OUTPUT COMMAREA **-", outputCommArea);
+        }
 
         return outputCommArea;
     }
@@ -164,37 +179,41 @@ public class CICSAdapter {
         byte[] byteCommArea = inputCommArea;
 
         try {
-            LOGGER.info("New ECIRequest in {} server to call {} program with {} transaction", this.endpoint.getServer(),
-                    programName, transactionId);
+            LOGGER.info("New ECIRequest in {} server to call {} program with {} transaction", this.endpoint.getServer(), programName,
+                    (null != transactionId ? transactionId : "no"));
 
-            // ECI Request to call CTG/CICS
-            ECIRequest eciRequestObject = new ECIRequest(ECIRequest.ECI_SYNC, // ECI call type
-                    this.endpoint.getServer(), // CICS Server
-                    this.endpoint.getUserId(), // CICS userid
-                    this.endpoint.getPassword(), // CICS password
-                    programName, // CICS program to be run
-                    transactionId, // CICS transid to be run
-                    byteCommArea); // Byte array containing the COMMAREA
+            // ECI Request to call CICS Transation Gateway
+            ECIRequest eciRequest = new ECIRequest(this.endpoint.getServer(), // CICS Server
+                    this.endpoint.getUserId(), // UserId, null for none
+                    this.endpoint.getPassword(), // Password, null for none
+                    programName, // Program name
+                    byteCommArea, // COMMAREA
+                    ECIRequest.ECI_NO_EXTEND, ECIRequest.ECI_LUW_NEW);
+
+            // Setting transaction ID
+            if (null != transactionId) {
+                eciRequest.Transid = transactionId;
+            }
 
             // TODO Other properties
             // eciRequestObject.setECITimeout((short)90000);
 
-            // if (LOGGER.isDebugEnabled()) {
-            LOGGER.info("Input CommArea Byte[] Data:\n-** INPUT COMMAREA **-\n{}\n-** END INPUT COMMAREA **-", inputCommArea);
-            // }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Input CommArea Byte[] Data:\n-** INPUT BYTE[] COMMAREA **-\n{}\n-** END INPUT COMMAREA **-", inputCommArea);
+            }
 
             // Call the flowRequest method
-            boolean flowResult = flowRequest(eciRequestObject);
+            boolean flowResult = flowRequest(eciRequest);
 
             if (!flowResult) {
                 LOGGER.warn("Something was not working in flowRequest");
             }
 
-            // if (LOGGER.isDebugEnabled()) {
-            LOGGER.info("Output CommArea Byte[] Data:\n-** OUTPUT COMMAREA **-\n{}\n-** END OUTPUT COMMAREA **-", byteCommArea);
-            // }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Output CommArea Byte[] Data:\n-** OUTPUT BYTE[] COMMAREA **-\n{}\n-** END OUTPUT COMMAREA **-", byteCommArea);
+            }
         } catch (Exception e) {
-            LOGGER.error("Unable to exectue transaction in CTG/CICS: " + e.getMessage(), e);
+            LOGGER.error("Unable to exectue transaction in CICS Transation Gateway: " + e.getMessage(), e);
             throw e;
         }
 
@@ -202,10 +221,10 @@ public class CICSAdapter {
     }
 
     /**
-     * The flowRequest method flows data contained in the ECIRequest object to the Gateway and determines whether it has been
-     * successful by checking the return code. If an error has occurred, the return code string and abend codes are printed to
-     * describe the error before the program exits. Note: Security may be required for client connection to the server and not
-     * just for the ECI request. Refer to the security chapter in the product documentation for further details.
+     * The flowRequest method flows data contained in the ECIRequest object to the Gateway and determines whether it has been successful by
+     * checking the return code. If an error has occurred, the return code string and abend codes are printed to describe the error before
+     * the program exits. Note: Security may be required for client connection to the server and not just for the ECI request. Refer to the
+     * security chapter in the product documentation for further details.
      * 
      * @param requestObject
      * 
@@ -223,16 +242,14 @@ public class CICSAdapter {
 
             // if (LOGGER.isDebugEnabled()) {
             LOGGER.info("Flow Result Code '{}' on Gateway {}", iRc, this.gateway);
-            LOGGER.info("CicsCodes: {}-{} on Gateway {}", requestObject.getCicsRc(), requestObject.getCicsRcString(),
-                    this.gateway);
+            LOGGER.info("CicsCodes: {}-{} on Gateway {}", requestObject.getCicsRc(), requestObject.getCicsRcString(), this.gateway);
             LOGGER.info("RcCodes: {}-{} on Gateway {}", requestObject.getRc(), requestObject.getRcString(), this.gateway);
             // }
 
             // Evaluation Result Codes
             if (iRc != 0) {
                 if (requestObject.getCicsRc() == 0) {
-                    LOGGER.warn("Gateway Flow Exception. Return code number:" + iRc + " Return code String: "
-                            + requestObject.getRcString());
+                    LOGGER.warn("Gateway Flow Exception. Return code number:" + iRc + " Return code String: " + requestObject.getRcString());
                     flowOk = false;
                 } else {
                     if (requestObject.getCicsRc() == ECIRequest.ECI_ERR_SECURITY_ERROR
@@ -261,8 +278,15 @@ public class CICSAdapter {
         return flowOk;
     }
 
+    private byte[] getBytes(String source, String encoding) throws java.io.UnsupportedEncodingException {
+        if (null != encoding) {
+            return source.getBytes(encoding);
+        }
+        return source.getBytes();
+    }
+
     /**
-     * Close and finalize the current Gateway to CTG/CICS
+     * Close and finalize the current Gateway to CICS Transation Gateway
      */
     public void close() {
         try {
@@ -273,7 +297,7 @@ public class CICSAdapter {
                 this.gateway = null;
             }
         } catch (IOException e) {
-            LOGGER.warn("Unable to close Gateway: " + e.getMessage(), e);
+            LOGGER.warn("Unable to close CICS Transation Gateway: " + e.getMessage(), e);
         }
     }
 

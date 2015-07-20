@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * CICS component to invoke programs running on CTG/CICS systems.
+ * CICS component to invoke programs running on CICS Transation Gateway systems.
  * 
  * @author Sergio Gutierrez (sgutierr@redhat.com)
  * @author Jose Roman Martin Gil (rmarting@redhat.com)
@@ -29,7 +29,7 @@ public class CICSComponent extends DefaultComponent {
         CICSEndpoint cicsEndpoint = new CICSEndpoint(uri, this);
 
         LOGGER.info("Created CICS Component");
-        
+
         return cicsEndpoint;
     }
 

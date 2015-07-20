@@ -52,10 +52,16 @@ public class CICSProducer extends DefaultProducer {
      * @throws Exception
      */
     private void processCTGProcedure(CICSEndpoint cicsEndpoint, Exchange exchange) throws Exception {
-        // Headers: programName and transactionID
+        // All Headers
         Map<String, Object> headers = exchange.getIn().getHeaders();
+        // Program Headers: programName, transactionID and commAreaSize
         String programName = (String) headers.get("programName");
         String transactionId = (String) headers.get("transactionId");
+        int commAreaSize = -1;
+        if (null != headers.get("commAreaSize")) {
+            commAreaSize = Integer.parseInt(headers.get("commAreaSize").toString());
+        }
+
         // Input CommArea Data from Exchange
         Object commArea = exchange.getIn().getBody();
         // Output CommArea Data to include in Exchange
@@ -71,15 +77,25 @@ public class CICSProducer extends DefaultProducer {
             // Open Gateway
             cicsAdapter.open();
 
-            // Execute Transaction
+            // Preparing CommArea Data
             if (commArea instanceof String) {
-                LOGGER.info("Run Transaction with data in String format");
-                result = cicsAdapter.runTransaction(programName, transactionId, (String) commArea);
+                // Execute Transaction with String
+                result = cicsAdapter.runTransaction(programName, transactionId, (String) commArea, commAreaSize);
             } else if (commArea instanceof byte[]) {
-                LOGGER.info("Run Transaction with data in byte format");
+                // Execute Transaction with byte[]
                 result = cicsAdapter.runTransaction(programName, transactionId, (byte[]) commArea);
             } else {
-                LOGGER.warn("Run Transaction with data format not available");
+                byte[] abCommArea = null;
+                if (commAreaSize > 0) {
+                    abCommArea = new byte[commAreaSize];
+                } else {
+                    abCommArea = new byte[0];
+                }
+
+                LOGGER.warn("Run Transaction with data format not available. Defining Default CommArea with size: {}", abCommArea.length);
+
+                // Execute Transaction with byte[]
+                result = cicsAdapter.runTransaction(programName, transactionId, abCommArea);
             }
 
             // Set Output Results in Exchange

@@ -5,7 +5,6 @@ package org.apache.camel.component.cics.exceptions;
  * 
  * @author Sergio Gutierrez (sgutierr@redhat.com)
  * @author Jose Roman Martin Gil (rmarting@redhat.com)
- * 
  */
 public class CICSException extends Exception {
 
